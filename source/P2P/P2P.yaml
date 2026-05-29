@@ -34,4 +34,6 @@
   format: yaml
   payload:
     - DOMAIN-WILDCARD,stun*.chat.bilibili.com
-    - AND,((NETWORK,UDP),(DST-PORT,1000-65535))
+    # 虎牙哔哩哔哩很多是四位端口 严格就是 1000 开始
+    # 但是微信视频通常用 8000 所以这里先放宽一些
+    - AND,((NETWORK,UDP),(DST-PORT,10000-65535))
