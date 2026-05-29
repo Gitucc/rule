@@ -1,8 +1,9 @@
 import YAML from "yaml";
 import { isIP } from "node:net";
 
-const SAFE_DOMAIN_TYPES = new Set(["DOMAIN-SUFFIX", "DOMAIN-WILDCARD"]);
+const SAFE_DOMAIN_TYPES = new Set(["DOMAIN-SUFFIX"]);
 const SAFE_IPCIDR_TYPES = new Set(["IP-CIDR", "IP-CIDR6"]);
+const UNSUPPORTED_CLASSICAL_PROVIDER_TYPES = new Set(["MATCH", "RULE-SET", "SUB-RULE"]);
 const COMMENT_PREFIXES = ["#", "//"];
 
 export class RuleSplitError extends Error {
@@ -45,6 +46,7 @@ export function splitRules({ content, format, behavior, context = {} }) {
       domain: [],
       ipcidr: [],
       remaining: [],
+      unsupported: [],
       passthroughMrs: true,
     };
   }
@@ -54,6 +56,7 @@ export function splitRules({ content, format, behavior, context = {} }) {
     domain: [],
     ipcidr: [],
     remaining: [],
+    unsupported: [],
     passthroughMrs: false,
   };
 
@@ -72,6 +75,7 @@ function addRuleToBuckets(rule, behavior, buckets) {
     const classified = classifyClassicalRule(raw);
     if (classified.kind === "domain") buckets.domain.push(classified.payload);
     else if (classified.kind === "unknown" && isPlainDomainPayload(raw)) buckets.domain.push(raw);
+    else if (classified.kind === "unsupported") buckets.unsupported.push(raw);
     else buckets.remaining.push(raw);
     return;
   }
@@ -80,6 +84,7 @@ function addRuleToBuckets(rule, behavior, buckets) {
     const classified = classifyClassicalRule(raw);
     if (classified.kind === "ipcidr") buckets.ipcidr.push(classified.payload);
     else if (classified.kind === "unknown") addUnknownRuleToBuckets(raw, buckets);
+    else if (classified.kind === "unsupported") buckets.unsupported.push(raw);
     else buckets.remaining.push(raw);
     return;
   }
@@ -88,6 +93,7 @@ function addRuleToBuckets(rule, behavior, buckets) {
   if (classified.kind === "domain") buckets.domain.push(classified.payload);
   else if (classified.kind === "ipcidr") buckets.ipcidr.push(classified.payload);
   else if (classified.kind === "unknown") addUnknownRuleToBuckets(raw, buckets);
+  else if (classified.kind === "unsupported") buckets.unsupported.push(raw);
   else buckets.remaining.push(raw);
 }
 
@@ -104,6 +110,9 @@ function addUnknownRuleToBuckets(raw, buckets) {
 
 export function classifyClassicalRule(ruleRaw) {
   const parsed = parseClassicalPayload(ruleRaw);
+  if (UNSUPPORTED_CLASSICAL_PROVIDER_TYPES.has(parsed.type)) {
+    return { kind: "unsupported", raw: ruleRaw, type: parsed.type };
+  }
   if (!parsed.type || !parsed.payload) return { kind: "unknown", raw: ruleRaw };
 
   if (parsed.type === "DOMAIN") {
@@ -115,12 +124,15 @@ export function classifyClassicalRule(ruleRaw) {
   }
   if (SAFE_DOMAIN_TYPES.has(parsed.type)) {
     const payload = domainPayloadFor(parsed.type, parsed.payload);
-    if (isMihomoDomainTriePayload(payload)) {
+    if (isClassicalDomainSuffixPayload(parsed.payload) && isMihomoDomainTriePayload(payload)) {
       return { kind: "domain", payload, raw: ruleRaw };
     }
     return { kind: "remaining", raw: ruleRaw, type: parsed.type };
   }
   if (SAFE_IPCIDR_TYPES.has(parsed.type)) {
+    if (hasClassicalParam(parsed.params, "src")) {
+      return { kind: "remaining", raw: ruleRaw, type: parsed.type };
+    }
     const payload = normalizeClassicalCIDRPayload(parsed.type, parsed.payload);
     if (payload) {
       return { kind: "ipcidr", payload, raw: ruleRaw };
@@ -142,12 +154,27 @@ export function parseClassicalPayload(ruleRaw) {
   };
 }
 
+function hasClassicalParam(params, name) {
+  return params.includes(name);
+}
+
 function domainPayloadFor(type, payload) {
   const value = String(payload).trim();
   if (type === "DOMAIN-SUFFIX") {
-    return `+.${value.replace(/^\.+/, "")}`;
+    return `+.${value}`;
   }
   return value;
+}
+
+function isClassicalDomainSuffixPayload(domain) {
+  const suffix = String(domain).trim();
+  return (
+    isMihomoDomainTriePayload(suffix) &&
+    !suffix.includes("/") &&
+    !suffix.startsWith(".") &&
+    !suffix.includes("*") &&
+    !suffix.includes("+")
+  );
 }
 
 function isPlainDomainPayload(value) {

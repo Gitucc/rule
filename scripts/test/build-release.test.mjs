@@ -630,3 +630,36 @@ test("fails with source entry context when local file is missing", async () => {
     },
   );
 });
+
+test("warns and ignores rules unsupported by generated classical rule-providers", async () => {
+  await withProject(
+    {
+      "source/example/source.yaml": `
+- name: unsupported
+  type: inline
+  behavior: classical
+  format: yaml
+  payload:
+    - RULE-SET,other-provider
+    - MATCH,DIRECT
+    - PROCESS-NAME,Example.app
+`,
+    },
+    async ({ root, mihomoPath }) => {
+      const warnings = [];
+      await buildRelease({
+        projectRoot: root,
+        repository: "xream/rule",
+        mihomoPath,
+        warn: (message) => warnings.push(message),
+      });
+      assert.deepEqual(warnings, [
+        "[warn] example:unsupported: ignored unsupported rules for generated classical rule-provider: RULE-SET,other-provider; MATCH,DIRECT. MATCH, RULE-SET, and SUB-RULE cannot be used inside a classical rule-provider.",
+      ]);
+      assert.equal(
+        await fs.readFile(path.join(root, ".release", "example", "source.yaml"), "utf8"),
+        "payload:\n  - PROCESS-NAME,Example.app\n",
+      );
+    },
+  );
+});

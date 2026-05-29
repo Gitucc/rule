@@ -13,9 +13,12 @@ payload:
   - PROCESS-NAME,Example.app
 `;
   const result = splitRules({ content, format: "yaml", behavior: "classical" });
-  assert.deepEqual(result.domain, ["example.com", "+.example.org", "*.example.net"]);
+  assert.deepEqual(result.domain, ["example.com", "+.example.org"]);
   assert.deepEqual(result.ipcidr, ["192.0.2.0/24", "2001:db8::/32"]);
-  assert.deepEqual(result.remaining, ["PROCESS-NAME,Example.app"]);
+  assert.deepEqual(result.remaining, [
+    "DOMAIN-WILDCARD,*.example.net",
+    "PROCESS-NAME,Example.app",
+  ]);
 });
 
 test("ignores text comments and blank lines", () => {
@@ -43,6 +46,10 @@ payload:
   - DOMAIN,.example.com
   - DOMAIN,foo+bar.example
   - DOMAIN,https://example.com/path
+  - DOMAIN-SUFFIX,*.example.com
+  - DOMAIN-SUFFIX,.example.com
+  - IP-CIDR,192.0.2.0/24,src
+  - IP-CIDR6,2001:db8::/32,src
   - SRC-IP-CIDR,10.0.0.0/8
   - GEOIP,CN
 `;
@@ -58,6 +65,10 @@ payload:
     "DOMAIN,.example.com",
     "DOMAIN,foo+bar.example",
     "DOMAIN,https://example.com/path",
+    "DOMAIN-SUFFIX,*.example.com",
+    "DOMAIN-SUFFIX,.example.com",
+    "IP-CIDR,192.0.2.0/24,src",
+    "IP-CIDR6,2001:db8::/32,src",
     "SRC-IP-CIDR,10.0.0.0/8",
     "GEOIP,CN",
   ]);
@@ -67,6 +78,7 @@ test("normalizes host IP classical CIDR payloads", () => {
   const content = `
 payload:
   - IP-CIDR,192.0.2.0/24
+  - IP-CIDR,198.51.100.0/24,no-resolve
   - IP-CIDR6,2001:db8::/32
   - IP-CIDR6,2001:db8::1
   - IP-CIDR,192.0.2.1
@@ -76,11 +88,36 @@ payload:
 `;
   const result = splitRules({ content, format: "yaml", behavior: "classical" });
   assert.deepEqual(result.domain, []);
-  assert.deepEqual(result.ipcidr, ["192.0.2.0/24", "2001:db8::/32", "2001:db8::1/128", "192.0.2.1/32"]);
+  assert.deepEqual(result.ipcidr, [
+    "192.0.2.0/24",
+    "198.51.100.0/24",
+    "2001:db8::/32",
+    "2001:db8::1/128",
+    "192.0.2.1/32",
+  ]);
   assert.deepEqual(result.remaining, [
     "IP-CIDR,999.0.0.0/8",
     "IP-CIDR,192.0.2.0/33",
     "IP-CIDR6,192.0.2.0/24",
+  ]);
+});
+
+test("separates rules unsupported by classical rule-providers", () => {
+  const content = `
+payload:
+  - RULE-SET,other-provider
+  - MATCH,DIRECT
+  - SUB-RULE,sub-rule-name
+  - PROCESS-NAME,Example.app
+`;
+  const result = splitRules({ content, format: "yaml", behavior: "classical" });
+  assert.deepEqual(result.domain, []);
+  assert.deepEqual(result.ipcidr, []);
+  assert.deepEqual(result.remaining, ["PROCESS-NAME,Example.app"]);
+  assert.deepEqual(result.unsupported, [
+    "RULE-SET,other-provider",
+    "MATCH,DIRECT",
+    "SUB-RULE,sub-rule-name",
   ]);
 });
 
@@ -90,12 +127,28 @@ payload:
   - DOMAIN,example.com
   - DOMAIN,mijia cloud
   - DOMAIN-SUFFIX,example.org
-  - DOMAIN-WILDCARD,*.example.net
 `;
   const result = splitRules({ content, format: "yaml", behavior: "classical" });
-  assert.deepEqual(result.domain, ["example.com", "mijia cloud", "+.example.org", "*.example.net"]);
+  assert.deepEqual(result.domain, ["example.com", "mijia cloud", "+.example.org"]);
   assert.deepEqual(result.ipcidr, []);
   assert.deepEqual(result.remaining, []);
+});
+
+test("keeps classical DOMAIN-WILDCARD glob rules in YAML remainder", () => {
+  const content = `
+payload:
+  - DOMAIN-WILDCARD,*.example.net
+  - DOMAIN-WILDCARD,stun*.chat.bilibili.com
+  - DOMAIN-WILDCARD,ab?.example.com
+`;
+  const result = splitRules({ content, format: "yaml", behavior: "classical" });
+  assert.deepEqual(result.domain, []);
+  assert.deepEqual(result.ipcidr, []);
+  assert.deepEqual(result.remaining, [
+    "DOMAIN-WILDCARD,*.example.net",
+    "DOMAIN-WILDCARD,stun*.chat.bilibili.com",
+    "DOMAIN-WILDCARD,ab?.example.com",
+  ]);
 });
 
 test("passes mrs input through without splitting", () => {

@@ -149,14 +149,17 @@ source/<source-name>/<rule-set-name>.yaml
 
 - `DOMAIN,example.com` -> `example.com`
 - `DOMAIN-SUFFIX,example.com` -> `+.example.com`
-- `DOMAIN-WILDCARD,*.example.com` -> `*.example.com`
 - plain domain payload -> domain
 - `IP-CIDR,192.0.2.0/24` -> `192.0.2.0/24`
 - `IP-CIDR6,2001:db8::/32` -> `2001:db8::/32`
+- `IP-CIDR,192.0.2.0/24,no-resolve` -> `192.0.2.0/24`
+- `IP-CIDR,192.0.2.0/24,src` -> remaining YAML
 - plain IP payload -> `/32` 或 `/128`
 - `PROCESS-NAME,Example.app` -> remaining YAML
 
-`DOMAIN,*`、`DOMAIN,+.example.com`、尾部带 `.` 或含有不安全通配符语义的 classical exact match 不会强行转换成 DomainTrie payload，会留在 remaining YAML。
+`DOMAIN-WILDCARD,*.example.com`、`DOMAIN-WILDCARD,stun*.example.com`、`DOMAIN,*`、`DOMAIN,+.example.com`、`DOMAIN-SUFFIX,*.example.com`、带 `src` 参数的 `IP-CIDR` / `IP-CIDR6`、尾部带 `.` 或含有不安全通配符语义的 classical 规则不会强行转换成 MRS，会留在 remaining YAML。Mihomo MRS 的 `domain` behavior 使用 DomainTrie payload；classical `DOMAIN-WILDCARD` 使用 glob 语义，两者不能等价直转。
+
+`MATCH`、`RULE-SET`、`SUB-RULE` 不能放在 Mihomo `behavior: classical` rule-provider 内；如果源里出现这些 top-level 规则，构建会输出 warning 并忽略这些规则。
 
 ## 本地开发
 

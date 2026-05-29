@@ -258,6 +258,7 @@ async function processGroup({ group, outputRoot, workRoot, fetchImpl, getMihomoP
       addToRuleBucket(buckets.domain, split.domain, entry.sourceEntryKey);
       warnIgnoredFakeIpFilterRules({ entry, split, warn });
     } else {
+      warnIgnoredUnsupportedRules({ entry, split, warn });
       addToRuleBucket(buckets.domain, split.domain, entry.sourceEntryKey);
       addToRuleBucket(buckets.ipcidr, split.ipcidr, entry.sourceEntryKey);
       addToRuleBucket(buckets.remaining, split.remaining, entry.sourceEntryKey);
@@ -354,9 +355,19 @@ function warnIgnoredFakeIpFilterRules({ entry, split, warn }) {
   const ignored = [];
   if (split.ipcidr.length > 0) ignored.push(`${split.ipcidr.length} ipcidr`);
   if (split.remaining.length > 0) ignored.push(`${split.remaining.length} remaining`);
+  if (split.unsupported?.length > 0) ignored.push(`${split.unsupported.length} unsupported`);
   if (ignored.length === 0) return;
   warn(
     `[warn] ${entry.sourceName}:${entry.name}: mihomo: fake-ip-filter only supports domain mrs; ignored ${ignored.join(", ")} rules.`,
+  );
+}
+
+function warnIgnoredUnsupportedRules({ entry, split, warn }) {
+  if (!split.unsupported?.length) return;
+  const sample = split.unsupported.slice(0, 3).join("; ");
+  const suffix = split.unsupported.length > 3 ? `; and ${split.unsupported.length - 3} more` : "";
+  warn?.(
+    `[warn] ${entry.sourceName}:${entry.name}: ignored unsupported rules for generated classical rule-provider: ${sample}${suffix}. MATCH, RULE-SET, and SUB-RULE cannot be used inside a classical rule-provider.`,
   );
 }
 
