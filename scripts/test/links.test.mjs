@@ -44,6 +44,16 @@ const sourceConfig = {
       format: "yaml",
       mihomo: "rules",
     },
+    {
+      name: "inline",
+      description: "Inline rules",
+      enabled: true,
+      type: "inline",
+      payload: ["DOMAIN,inline.example", "DOMAIN,inline-two.example"],
+      behavior: "classical",
+      format: "yaml",
+      mihomo: "rules",
+    },
   ],
 };
 
@@ -82,6 +92,14 @@ test("renders source table and artifact links", () => {
         label: "mixed original",
         fileName: "mixed.original.yaml",
         relativePath: "example/mixed.original.yaml",
+      },
+      {
+        sourceRelativeDir: "example",
+        entryName: "inline",
+        kind: "original",
+        label: "inline original",
+        fileName: "inline.original.yaml",
+        relativePath: "example/inline.original.yaml",
       },
       {
         sourceRelativeDir: "example",
@@ -148,6 +166,11 @@ test("renders source table and artifact links", () => {
   assert.match(readme, /DOMAIN,first\.example\.\.\./);
   assert.match(readme, /DOMAIN,draft\.example/);
   assert.doesNotMatch(readme, /DOMAIN,draft\.example\.\.\./);
+  assert.match(
+    readme,
+    /\[inline\.original\.yaml\]\(https:\/\/github\.com\/xream\/rule\/blob\/release\/example\/inline\.original\.yaml\)/,
+  );
+  assert.doesNotMatch(readme, /DOMAIN,inline\.example\.\.\./);
   assert.match(readme, /## Mihomo Config/);
   assert.equal(
     readme.includes(`proxy-groups:

@@ -319,6 +319,18 @@ test("keeps original artifacts distinct for same-named entries in different conf
         fs.access(path.join(output, "rules.original.yaml")),
       );
       const readme = await fs.readFile(path.join(output, "README.md"), "utf8");
+      const sourceFilesSection = readme.slice(
+        readme.indexOf("## Source Files"),
+        readme.indexOf("## Mihomo Config"),
+      );
+      assert.match(
+        sourceFilesSection,
+        /\[apple_rules\.original\.yaml\]\(https:\/\/github\.com\/xream\/rule\/blob\/release\/example\/apple_rules\.original\.yaml\)/,
+      );
+      assert.match(
+        sourceFilesSection,
+        /\[google_rules\.original\.yaml\]\(https:\/\/github\.com\/xream\/rule\/blob\/release\/example\/google_rules\.original\.yaml\)/,
+      );
       assert.match(
         readme,
         /#### apple_Domain\.mrs[\s\S]*Source: \[apple_rules\.original\.yaml\]/,
@@ -531,6 +543,19 @@ test("writes inline payloads as original artifacts", async () => {
         ),
         "DOMAIN,inline.example\n",
       );
+      const readme = await fs.readFile(
+        path.join(root, ".release", "inline", "README.md"),
+        "utf8",
+      );
+      const sourceFilesSection = readme.slice(
+        readme.indexOf("## Source Files"),
+        readme.indexOf("## Mihomo Config"),
+      );
+      assert.match(
+        sourceFilesSection,
+        /\[inline-rules\.original\.txt\]\(https:\/\/github\.com\/xream\/rule\/blob\/release\/inline\/inline-rules\.original\.txt\)/,
+      );
+      assert.doesNotMatch(sourceFilesSection, /DOMAIN,inline\.example/);
     },
   );
 });

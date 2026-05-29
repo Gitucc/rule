@@ -54,8 +54,11 @@ export function renderReleaseReadme({
     "",
     renderSourceTable({
       files: sourceConfig.files,
+      sourceRelativeDir: sourceConfig.sourceRelativeDir,
+      artifacts: relevantArtifacts,
       repository: repo,
       mainBranch,
+      releaseBranch,
     }),
     "",
     "## Mihomo Config",
@@ -99,7 +102,19 @@ function renderSourceConfigLinks({ sourceConfig, repository, mainBranch }) {
   return `${configFiles.length === 1 ? "Source config" : "Source configs"}: ${links.join(", ")}`;
 }
 
-function renderSourceTable({ files, repository, mainBranch }) {
+function renderSourceTable({
+  files,
+  sourceRelativeDir,
+  artifacts,
+  repository,
+  mainBranch,
+  releaseBranch,
+}) {
+  const sourceArtifacts = new Map(
+    artifacts
+      .filter((artifact) => artifact.kind === "original")
+      .map((artifact) => [sourceArtifactKey(artifact), artifact]),
+  );
   const header = [
     "name",
     "description",
@@ -130,13 +145,44 @@ function renderSourceTable({ files, repository, mainBranch }) {
         summarizeHeaders(file.headers),
         renderExternalLink(file.url),
         renderSourcePathLink({ file, repository, mainBranch }),
-        summarizePayload(file.payload),
+        renderPayloadReference({
+          file,
+          sourceRelativeDir,
+          sourceArtifacts,
+          repository,
+          releaseBranch,
+        }),
       ]
         .map(markdownCell)
         .join(" | ")} |`,
     );
   }
   return rows.join("\n");
+}
+
+function renderPayloadReference({
+  file,
+  sourceRelativeDir,
+  sourceArtifacts,
+  repository,
+  releaseBranch,
+}) {
+  if (file.type === "inline") {
+    const sourceArtifact = sourceArtifacts.get(
+      sourceArtifactKey({
+        ...file,
+        sourceRelativeDir: file.sourceRelativeDir ?? sourceRelativeDir,
+      }),
+    );
+    if (sourceArtifact) {
+      return `[${sourceArtifact.fileName}](${githubBlobURL({
+        repository,
+        branch: releaseBranch,
+        filePath: sourceArtifact.relativePath,
+      })})`;
+    }
+  }
+  return summarizePayload(file.payload);
 }
 
 function renderExternalLink(url) {
@@ -483,7 +529,7 @@ function ruleProviderRule(artifact) {
 function sourceArtifactKey(artifact) {
   if (artifact.sourceEntryKey)
     return `${artifact.sourceRelativeDir}\0${artifact.sourceEntryKey}`;
-  return `${artifact.sourceRelativeDir}\0${artifact.entryName}`;
+  return `${artifact.sourceRelativeDir}\0${artifact.entryName ?? artifact.name}`;
 }
 
 function companionArtifactKey(artifact) {
