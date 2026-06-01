@@ -1,0 +1,27 @@
+- name: Bilibili
+  description: B站规则（classical yaml）
+  type: http
+  behavior: classical
+  format: yaml
+  url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/Ruleset/Bilibili.yaml
+
+- name: BilibiliBobby
+  description: B站规则（classical txt）
+  type: http
+  behavior: classical
+  format: text
+  url: https://raw.githubusercontent.com/LM-Firefly/Rules/master/Domestic-Services/BiliBili.list
+
+- name: iQIYI
+  description: 爱奇艺规则（classical txt）
+  type: http
+  behavior: classical
+  format: text
+  url: https://raw.githubusercontent.com/LM-Firefly/Rules/refs/heads/master/Domestic-Services/iQIYI.list
+
+- name: ChinaMedia
+  description: 中国媒体规则（classical yaml）
+  type: http
+  behavior: classical
+  format: yaml
+  url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/ChinaMedia/ChinaMedia.yaml
