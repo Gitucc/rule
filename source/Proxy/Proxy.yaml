@@ -1,0 +1,34 @@
+- name: BlackList
+  description: BlackList 规则（classical txt）
+  type: http
+  behavior: classical
+  format: text
+  url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/source/rule/BlackList/BlackList.list
+
+- name: Proxy
+  description: Proxy 规则提供者（classical yaml）
+  type: http
+  behavior: classical
+  format: yaml
+  url: https://raw.githubusercontent.com/dler-io/Rules/main/Clash/Provider/Proxy.yaml
+
+- name: ProxyDomain
+  description: Proxy 域名规则（domain txt）
+  type: http
+  behavior: domain
+  format: text
+  url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/source/rule/Proxy/Proxy.list
+
+- name: GFWList
+  description: GFW 列表（domain txt）
+  type: http
+  behavior: domain
+  format: text
+  url: https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/gfw.txt
+
+- name: GreatFireList
+  description: 大陆防火墙列表（domain txt）
+  type: http
+  behavior: domain
+  format: text
+  url: https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/greatfire.txt
