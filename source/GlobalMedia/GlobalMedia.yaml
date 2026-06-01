@@ -11,17 +11,10 @@
   behavior: classical
   format: yaml
   url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/Ruleset/YouTubeMusic.yaml
-
-- name: ForeignMedia
-  description: 外国媒体规则（classical txt）
-  type: http
-  behavior: classical
-  format: text
-  url: https://raw.githubusercontent.com/sve1r/Rules-For-Quantumult-X/develop/Rules/Media/ForeignMedia.list
-
-- name: GMedia
+  
+- name: GlobalMedia
   description: 国际媒体规则（classical txt）
   type: http
   behavior: classical
   format: text
-  url: https://raw.githubusercontent.com/zqzess/rule_for_quantumultX/master/QuantumultX/rules/GMedia.list
+  url: https://raw.githubusercontent.com/LM-Firefly/Rules/refs/heads/master/GlobalMedia.list
