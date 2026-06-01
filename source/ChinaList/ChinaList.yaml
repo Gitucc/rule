@@ -1,0 +1,6 @@
+- name: ChinaList
+  description: China domain rules
+  type: http
+  behavior: domain
+  format: text
+  url: https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/direct.txt
