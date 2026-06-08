@@ -1,12 +1,10 @@
 - name: ChinaList
-  description: China domain rules
   type: http
   behavior: domain
-  format: text
+  format: yaml
   url: https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/direct.txt
 
 - name: ChinaMaxNoMedia
-  description: 中国域名最大列表（无媒体）（classical yaml）
   type: http
   behavior: classical
   format: yaml
