@@ -2,5 +2,5 @@
   description: Apple CN
   type: http
   behavior: domain
-  format: text
+  format: yaml
   url: https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/apple.txt
