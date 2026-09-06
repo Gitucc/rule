@@ -1,0 +1,14 @@
+payload:
+  - USER-AGENT,Roam*
+  - DOMAIN-KEYWORD,tesla
+  - DOMAIN-KEYWORD,appledaily
+  - DOMAIN-KEYWORD,beetalk
+  - DOMAIN-KEYWORD,blogspot
+  - DOMAIN-KEYWORD,dropbox
+  - DOMAIN-KEYWORD,facebook
+  - DOMAIN-KEYWORD,github
+  - DOMAIN-KEYWORD,instagram
+  - DOMAIN-KEYWORD,twitter
+  - DOMAIN-KEYWORD,whatsapp
+  - DOMAIN-KEYWORD,google
+  - DOMAIN-KEYWORD,dlercloud
