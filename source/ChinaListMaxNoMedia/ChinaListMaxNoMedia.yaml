@@ -13,5 +13,5 @@
 - name: DomesticList
   type: http
   behavior: classical
-  format: txt
+  format: text
   url: https://raw.githubusercontent.com/LM-Firefly/Rules/refs/heads/master/Domestic.list
