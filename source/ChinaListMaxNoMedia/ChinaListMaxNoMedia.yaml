@@ -4,8 +4,14 @@
   format: yaml
   url: https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/direct.txt
 
-- name: ChinaMaxNoMedia
+- name: ChinaMaxNoMedia_IP
+  type: http
+  behavior: ipcidr
+  format: yaml
+  url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/ChinaMaxNoMedia/ChinaMaxNoMedia_IP.yaml
+
+- name: DomesticList
   type: http
   behavior: classical
   format: yaml
-  url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/ChinaMaxNoMedia/ChinaMaxNoMedia_Classical.yaml
+  url: https://raw.githubusercontent.com/LM-Firefly/Rules/refs/heads/master/Domestic.list
