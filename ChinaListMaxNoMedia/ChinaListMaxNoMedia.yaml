@@ -1,0 +1,22 @@
+payload:
+  - PROCESS-NAME,com.taobao.taobao
+  - PROCESS-NAME,com.bilibili.app.in
+  - PROCESS-NAME,tv.danmaku.bili
+  - PROCESS-NAME,com.qiyi.video
+  - USER-AGENT,iQiYi*
+  - USER-AGENT,PPStream*
+  - USER-AGENT,QIYI*
+  - USER-AGENT,QYPlayer*
+  - PROCESS-NAME,com.jjwxc.reader
+  - USER-AGENT,live4iphone*
+  - USER-AGENT,qqlive4iphone*
+  - USER-AGENT,TencentMidasConnect*
+  - USER-AGENT,MOO%E9%9F%B3%E4%B9%90*
+  - USER-AGENT,QQ%E9%9F%B3%E4%B9%90
+  - PROCESS-NAME,com.xiaomi.mibrain.speech
+  - PROCESS-NAME,小米云服务.exe
+  - PROCESS-NAME,Thunder
+  - PROCESS-NAME,Thunder.exe
+  - USER-AGENT,TikTok*
+  - PROCESS-NAME,com.zhiliaoapp.musically
+  - DOMAIN-KEYWORD,-tiktokcdn-com
